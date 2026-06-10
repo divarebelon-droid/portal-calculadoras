@@ -433,7 +433,7 @@
        Substitua os valores "COLE_AQUI" pelo seu config
   ══════════════════════════════════════════════════ -->
   <script type="module">
-    import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut }
       from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
@@ -448,7 +448,8 @@
     const _ALLOWED = "divarebel.on@gmail.com";
 
     document.body.style.visibility = 'hidden';
-    const _auth = getAuth(initializeApp(_CFG, 'guard-eu'));
+    const _app  = getApps().length ? getApp() : initializeApp(_CFG);
+    const _auth = getAuth(_app);
 
     onAuthStateChanged(_auth, u => {
       if (!u || u.email.toLowerCase() !== _ALLOWED) {

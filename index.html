@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portal · Calculadoras</title>
+  <style>
+    @font-face{font-family:'Satoshi';src:url('../satoshi/Satoshi-Black.otf') format('opentype');font-weight:900;font-style:normal}
+    @font-face{font-family:'Satoshi';src:url('../satoshi/Satoshi-BlackItalic.otf') format('opentype');font-weight:900;font-style:italic}
+    @font-face{font-family:'Satoshi';src:url('../satoshi/Satoshi-Bold.otf') format('opentype');font-weight:700}
+    @font-face{font-family:'Satoshi';src:url('../satoshi/Satoshi-Medium.otf') format('opentype');font-weight:500}
+    @font-face{font-family:'Satoshi';src:url('../satoshi/Satoshi-Regular.otf') format('opentype');font-weight:400}
+    @font-face{font-family:'Satoshi';src:url('../satoshi/Satoshi-Light.otf') format('opentype');font-weight:300}
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --bg:#0d0d0c;
+      --card:rgba(255,255,255,.028);
+      --bd:rgba(220,218,217,.08);
+      --bdh:rgba(220,218,217,.22);
+      --t1:#f0ede8;
+      --t2:#9fa4a2;
+      --t3:#494947;
+      --t4:#2a2a28;
+    }
+
+    html,body{height:100%}
+
+    body{
+      font-family:'Satoshi','Segoe UI',system-ui,sans-serif;
+      background:var(--bg);
+      min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+
+    /* ── Grain ── */
+    .grain{
+      position:fixed;inset:-50%;width:200%;height:200%;
+      pointer-events:none;z-index:200;opacity:.04;
+      animation:grainMove .5s steps(8) infinite;
+    }
+    @keyframes grainMove{
+      0%{transform:translate(0,0)}12%{transform:translate(-3%,-4%)}
+      25%{transform:translate(4%,3%)}37%{transform:translate(-2%,5%)}
+      50%{transform:translate(5%,-2%)}62%{transform:translate(-4%,4%)}
+      75%{transform:translate(3%,-3%)}87%{transform:translate(-5%,2%)}
+      100%{transform:translate(0,0)}
+    }
+
+    /* ── Ambient blobs ── */
+    .aurora{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+    .blob{position:absolute;border-radius:50%;filter:blur(160px);animation:blobDrift 24s ease-in-out infinite}
+    .blob-1{width:800px;height:800px;background:rgba(73,73,71,.11);top:-250px;left:-200px}
+    .blob-2{width:600px;height:600px;background:rgba(123,120,122,.08);bottom:-150px;right:-150px;animation-delay:-12s;animation-duration:20s}
+    @keyframes blobDrift{
+      0%,100%{transform:translate(0,0) scale(1)}
+      40%{transform:translate(60px,40px) scale(1.08)}
+      70%{transform:translate(-40px,60px) scale(.94)}
+    }
+
+    /* ── Spotlight ── */
+    .spotlight{
+      position:fixed;width:1200px;height:1200px;border-radius:50%;
+      background:radial-gradient(ellipse,rgba(220,218,217,.022) 0%,transparent 65%);
+      pointer-events:none;z-index:0;
+      animation:spotMove 32s ease-in-out infinite;
+    }
+    @keyframes spotMove{
+      0%{transform:translate(-40vw,-40vh)}30%{transform:translate(30vw,-15vh)}
+      60%{transform:translate(15vw,45vh)}80%{transform:translate(-25vw,25vh)}
+      100%{transform:translate(-40vw,-40vh)}
+    }
+
+    /* ── Card ── */
+    .card{
+      position:relative;z-index:10;
+      width:420px;max-width:calc(100vw - 32px);
+      padding:52px 44px 44px;
+      background:var(--card);
+      border:1px solid var(--bd);
+      border-radius:24px;
+      backdrop-filter:blur(24px);
+      opacity:0;transform:translateY(28px) scale(.98);
+      animation:cardIn .85s cubic-bezier(.16,1,.3,1) .15s forwards;
+    }
+    @keyframes cardIn{to{opacity:1;transform:translateY(0) scale(1)}}
+
+    /* ── Mark ── */
+    .mark{
+      width:42px;height:42px;
+      border:1px solid var(--bd);border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:17px;color:var(--t2);
+      margin-bottom:28px;
+      animation:markIn .6s cubic-bezier(.34,1.56,.64,1) .5s both;
+    }
+    @keyframes markIn{
+      from{opacity:0;transform:scale(.5) rotate(-15deg)}
+      to{opacity:1;transform:scale(1) rotate(0)}
+    }
+
+    /* ── Title ── */
+    .title{font-size:30px;font-weight:900;color:var(--t1);letter-spacing:-1.2px;line-height:1.1;margin-bottom:8px}
+    .title em{font-style:italic;color:var(--t2)}
+    .subtitle{font-size:13px;color:var(--t3);margin-bottom:36px;font-weight:400}
+
+    /* ── Fields ── */
+    .field{margin-bottom:14px}
+    .field label{
+      display:block;font-size:10px;font-weight:700;
+      letter-spacing:2px;text-transform:uppercase;
+      color:var(--t2);margin-bottom:8px;
+    }
+    .field input{
+      width:100%;padding:13px 15px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--bd);border-radius:10px;
+      color:var(--t1);
+      font-family:'Satoshi',sans-serif;font-size:15px;font-weight:400;
+      outline:none;
+      transition:border-color .2s,background .2s,box-shadow .2s;
+    }
+    .field input:focus{
+      border-color:var(--bdh);
+      background:rgba(255,255,255,.065);
+      box-shadow:0 0 0 3px rgba(220,218,217,.06);
+    }
+    .field input::placeholder{color:var(--t4)}
+    .field input:disabled{opacity:.45;cursor:not-allowed}
+
+    .field-new{animation:fieldSlide .32s cubic-bezier(.16,1,.3,1) both}
+    @keyframes fieldSlide{
+      from{opacity:0;transform:translateY(10px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    /* ── Button ── */
+    .btn{
+      width:100%;padding:14px;margin-top:6px;
+      background:var(--t1);color:var(--bg);
+      border:none;border-radius:10px;
+      font-family:'Satoshi',sans-serif;font-size:13px;font-weight:700;
+      letter-spacing:.5px;cursor:pointer;
+      transition:opacity .2s,transform .12s,box-shadow .2s;
+      box-shadow:0 4px 20px rgba(240,237,232,.08);
+    }
+    .btn:hover:not(:disabled){opacity:.9;box-shadow:0 6px 28px rgba(240,237,232,.14)}
+    .btn:active:not(:disabled){transform:scale(.985)}
+    .btn:disabled{opacity:.42;cursor:not-allowed;transform:none}
+
+    /* ── Error ── */
+    .err{
+      padding:11px 14px;margin-top:12px;
+      background:rgba(255,80,80,.07);
+      border:1px solid rgba(255,80,80,.18);
+      border-radius:8px;
+      font-size:12.5px;color:#ff9090;
+      display:none;
+    }
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      20%,60%{transform:translateX(-5px)}
+      40%,80%{transform:translateX(5px)}
+    }
+    .err.shake{animation:shake .35s}
+
+    /* ── Success flash ── */
+    .success{
+      position:fixed;inset:0;background:var(--bg);
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;pointer-events:none;z-index:300;
+      transition:opacity .45s;
+    }
+    .success.show{opacity:1;pointer-events:all}
+    .success-mark{
+      font-size:52px;font-weight:900;color:var(--t1);letter-spacing:-3px;
+      animation:pulse .6s ease infinite alternate;
+    }
+    @keyframes pulse{from{opacity:.7}to{opacity:1}}
+
+    /* ── Badge ── */
+    .badge{
+      position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+      font-size:10px;color:var(--t3);letter-spacing:3px;text-transform:uppercase;
+      z-index:10;white-space:nowrap;
+      opacity:0;animation:cardIn .6s ease .8s forwards;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Grain -->
+  <svg class="grain" xmlns="http://www.w3.org/2000/svg">
+    <filter id="gn">
+      <feTurbulence type="fractalNoise" baseFrequency=".82" numOctaves="4" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#gn)"/>
+  </svg>
+
+  <div class="spotlight"></div>
+  <div class="aurora">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="card">
+    <div class="mark">◆</div>
+    <h1 class="title">Portal de<br><em>Calculadoras</em></h1>
+    <p class="subtitle">Acesso exclusivo para clientes</p>
+
+    <form id="loginForm" autocomplete="on">
+      <div class="field" id="fieldEmail">
+        <label>E-mail</label>
+        <input type="email" id="emailInput" placeholder="seu@email.com"
+               autocomplete="email" required>
+      </div>
+
+      <div class="field field-new" id="fieldPass" style="display:none">
+        <label id="passLabel">Senha</label>
+        <input type="password" id="passInput" placeholder="••••••••"
+               autocomplete="current-password" minlength="6">
+      </div>
+
+      <div class="field field-new" id="fieldConfirm" style="display:none">
+        <label>Confirmar senha</label>
+        <input type="password" id="confirmInput" placeholder="••••••••"
+               autocomplete="new-password" minlength="6">
+      </div>
+
+      <div class="err" id="errMsg"></div>
+
+      <button type="submit" class="btn" id="submitBtn">Continuar →</button>
+    </form>
+  </div>
+
+  <div class="success" id="successEl">
+    <span class="success-mark">→</span>
+  </div>
+
+  <div class="badge">Acesso privado</div>
+
+  <!--
+  ══════════════════════════════════════════════════════
+  ⚙️  CONFIGURAÇÃO — 2 passos antes de publicar
+
+  PASSO 1 — Criar projeto Firebase (gratuito)
+    → Acesse https://console.firebase.google.com
+    → "Adicionar projeto" → dê um nome → continuar
+    → Vá em: ⚙️ Configurações > Seus apps > "</> Web"
+    → Registre o app e copie o firebaseConfig abaixo
+
+  PASSO 2 — Ativar login por e-mail
+    → No Firebase Console: Authentication > Sign-in method
+    → Clique em "E-mail/senha" → Ative → Salvar
+
+  Depois substitua cada "COLE_AQUI" pelos valores reais.
+  ══════════════════════════════════════════════════════
+  -->
+  <script type="module">
+    import { initializeApp }
+      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import {
+      getAuth, onAuthStateChanged,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      fetchSignInMethodsForEmail
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    /* ─────────────────────────────────────
+       ⚙️  CONFIG FIREBASE — substituir aqui
+    ───────────────────────────────────── */
+    const FIREBASE_CONFIG = {
+      apiKey:            "AIzaSyDkAop4JvIVriZXjvyu2HWolhb0acgTSK4",
+      authDomain:        "portal-calculadoras.firebaseapp.com",
+      projectId:         "portal-calculadoras",
+      storageBucket:     "portal-calculadoras.firebasestorage.app",
+      messagingSenderId: "219793673501",
+      appId:             "1:219793673501:web:893a9b5d388998846865f4"
+    };
+
+    /* ─────────────────────────────────────
+       ⚙️  USUÁRIOS AUTORIZADOS
+       "email": "arquivo-calculadora.html"
+       Para adicionar cliente: nova linha aqui
+    ───────────────────────────────────── */
+    const USERS = {
+      "divarebel.on@gmail.com":              "calculadora-eu.html",
+      "financeiro.brunaboreggio@gmail.com":  "calculadora-bruna.html"
+    };
+
+    /* ── Init Firebase ── */
+    const app  = initializeApp(FIREBASE_CONFIG);
+    const auth = getAuth(app);
+
+    /* Se já logado → redireciona direto */
+    onAuthStateChanged(auth, user => {
+      if (user && USERS[user.email.toLowerCase()])
+        goTo(USERS[user.email.toLowerCase()]);
+    });
+
+    /* ── DOM refs ── */
+    const form         = document.getElementById('loginForm');
+    const emailInput   = document.getElementById('emailInput');
+    const passInput    = document.getElementById('passInput');
+    const confirmInput = document.getElementById('confirmInput');
+    const fieldPass    = document.getElementById('fieldPass');
+    const fieldConfirm = document.getElementById('fieldConfirm');
+    const passLabel    = document.getElementById('passLabel');
+    const errEl        = document.getElementById('errMsg');
+    const submitBtn    = document.getElementById('submitBtn');
+
+    let step = 'email'; // 'email' | 'login' | 'register'
+
+    function showErr(msg) {
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+      errEl.classList.remove('shake');
+      void errEl.offsetWidth;
+      errEl.classList.add('shake');
+    }
+
+    function goTo(url) {
+      document.getElementById('successEl').classList.add('show');
+      setTimeout(() => { window.location.href = url; }, 550);
+    }
+
+    function setBusy(busy, label) {
+      submitBtn.disabled = busy;
+      submitBtn.textContent = label;
+    }
+
+    function friendlyErr(code) {
+      return ({
+        'auth/wrong-password':         'Senha incorreta.',
+        'auth/invalid-credential':     'Senha incorreta.',
+        'auth/too-many-requests':      'Muitas tentativas. Aguarde alguns minutos.',
+        'auth/invalid-email':          'E-mail inválido.',
+        'auth/network-request-failed': 'Sem conexão. Verifique sua internet.',
+        'auth/email-already-in-use':   'Este e-mail já tem senha. Faça login normalmente.',
+      })[code] ?? 'Erro ao entrar. Tente novamente.';
+    }
+
+    /* ── Form submit ── */
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      errEl.style.display = 'none';
+
+      /* ── Etapa 1: verificar e-mail ── */
+      if (step === 'email') {
+        const email = emailInput.value.trim().toLowerCase();
+
+        if (!USERS[email]) {
+          showErr('E-mail não autorizado. Entre em contato com a Aline.');
+          return;
+        }
+
+        setBusy(true, 'Verificando...');
+
+        try {
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+
+          if (methods.length > 0) {
+            step = 'login';
+            passLabel.textContent = 'Senha';
+            fieldPass.style.display = 'block';
+            setBusy(false, 'Entrar →');
+          } else {
+            step = 'register';
+            passLabel.textContent = 'Criar sua senha';
+            fieldPass.style.display = 'block';
+            fieldConfirm.style.display = 'block';
+            setBusy(false, 'Criar senha e entrar →');
+          }
+
+          emailInput.disabled = true;
+          setTimeout(() => passInput.focus(), 50);
+
+        } catch {
+          showErr('Erro ao verificar. Tente novamente.');
+          setBusy(false, 'Continuar →');
+        }
+        return;
+      }
+
+      const email = emailInput.value.trim().toLowerCase();
+      const pw    = passInput.value;
+
+      /* ── Etapa 2a: primeiro acesso — criar senha ── */
+      if (step === 'register') {
+        if (pw.length < 6) { showErr('A senha precisa ter pelo menos 6 caracteres.'); return; }
+        if (pw !== confirmInput.value) { showErr('As senhas não coincidem.'); return; }
+
+        setBusy(true, 'Criando conta...');
+        try {
+          await createUserWithEmailAndPassword(auth, email, pw);
+          goTo(USERS[email]);
+        } catch (err) {
+          showErr(friendlyErr(err.code));
+          setBusy(false, 'Criar senha e entrar →');
+        }
+        return;
+      }
+
+      /* ── Etapa 2b: login normal ── */
+      setBusy(true, 'Entrando...');
+      try {
+        await signInWithEmailAndPassword(auth, email, pw);
+        goTo(USERS[email]);
+      } catch (err) {
+        showErr(friendlyErr(err.code));
+        setBusy(false, 'Entrar →');
+      }
+    });
+  </script>
+</body>
+</html>

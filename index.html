@@ -399,8 +399,21 @@
           await createUserWithEmailAndPassword(auth, email, pw);
           goTo(USERS[email]);
         } catch (err) {
-          showErr(friendlyErr(err.code));
-          setBusy(false, 'Criar senha e entrar →');
+          if (err.code === 'auth/email-already-in-use') {
+            /* Firebase Email Enumeration Protection faz fetchSignInMethods
+               retornar vazio mesmo p/ contas existentes — detectamos aqui
+               e trocamos silenciosamente para o fluxo de login */
+            step = 'login';
+            passLabel.textContent = 'Senha';
+            fieldConfirm.style.display = 'none';
+            passInput.value = '';
+            errEl.style.display = 'none';
+            setBusy(false, 'Entrar →');
+            passInput.focus();
+          } else {
+            showErr(friendlyErr(err.code));
+            setBusy(false, 'Criar senha e entrar →');
+          }
         }
         return;
       }

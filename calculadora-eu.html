@@ -413,11 +413,12 @@
       cursor:pointer;transition:border-color .25s,color .25s;display:flex;align-items:center;gap:6px;
     }
     .clients-btn:hover{border-color:var(--obs);color:var(--obs)}
+    .clients-wrap{position:relative;overflow:visible}
     .clients-menu{
       position:absolute;top:calc(100% + 8px);right:0;
       background:#faf9f6;border:1.5px solid var(--bd);border-radius:12px;
       padding:6px;min-width:210px;box-shadow:0 8px 32px rgba(26,26,26,.12);
-      display:none;z-index:100;
+      display:none;z-index:9999;
     }
     /* ponte invisível que mantém o hover ao mover o mouse do botão pro menu */
     .clients-menu::before{

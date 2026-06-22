@@ -266,8 +266,7 @@
     import {
       getAuth, onAuthStateChanged,
       signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      fetchSignInMethodsForEmail
+      createUserWithEmailAndPassword
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
     /* ─────────────────────────────────────
@@ -359,31 +358,13 @@
           return;
         }
 
-        setBusy(true, 'Verificando...');
-
-        try {
-          const methods = await fetchSignInMethodsForEmail(auth, email);
-
-          if (methods.length > 0) {
-            step = 'login';
-            passLabel.textContent = 'Senha';
-            fieldPass.style.display = 'block';
-            setBusy(false, 'Entrar →');
-          } else {
-            step = 'register';
-            passLabel.textContent = 'Criar sua senha';
-            fieldPass.style.display = 'block';
-            fieldConfirm.style.display = 'block';
-            setBusy(false, 'Criar senha e entrar →');
-          }
-
-          emailInput.disabled = true;
-          setTimeout(() => passInput.focus(), 50);
-
-        } catch {
-          showErr('Erro ao verificar. Tente novamente.');
-          setBusy(false, 'Continuar →');
-        }
+        step = 'login';
+        passLabel.textContent = 'Senha';
+        fieldPass.style.display = 'block';
+        fieldConfirm.style.display = 'none';
+        emailInput.disabled = true;
+        setBusy(false, 'Entrar →');
+        setTimeout(() => passInput.focus(), 50);
         return;
       }
 
@@ -425,8 +406,18 @@
         await signInWithEmailAndPassword(auth, email, pw);
         goTo(USERS[email]);
       } catch (err) {
-        showErr(friendlyErr(err.code));
-        setBusy(false, 'Entrar →');
+        if (err.code === 'auth/user-not-found') {
+          step = 'register';
+          passLabel.textContent = 'Criar sua senha';
+          fieldConfirm.style.display = 'block';
+          passInput.value = '';
+          errEl.style.display = 'none';
+          setBusy(false, 'Criar senha e entrar →');
+          setTimeout(() => passInput.focus(), 50);
+        } else {
+          showErr(friendlyErr(err.code));
+          setBusy(false, 'Entrar →');
+        }
       }
     });
   </script>

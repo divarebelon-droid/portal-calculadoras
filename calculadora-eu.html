@@ -822,12 +822,15 @@ function calc(){
 }
 calc();
 
-// Dropdown clientes — position:fixed para escapar de clip-path do header
+// Dropdown clientes — move para body para escapar clip-path do header
 (function(){
   const wrap = document.querySelector('.clients-wrap');
   const btn  = document.querySelector('.clients-btn');
   const menu = document.querySelector('.clients-menu');
   if (!wrap || !menu) return;
+
+  // Tira do header (clip-path corta filhos mesmo com position:fixed)
+  document.body.appendChild(menu);
 
   function show() {
     const r = btn.getBoundingClientRect();

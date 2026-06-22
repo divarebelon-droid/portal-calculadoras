@@ -413,20 +413,13 @@
       cursor:pointer;transition:border-color .25s,color .25s;display:flex;align-items:center;gap:6px;
     }
     .clients-btn:hover{border-color:var(--obs);color:var(--obs)}
-    .clients-wrap{position:relative;overflow:visible}
-    /* clip-path da animação curtain fica em inset(0 0% 0 0) e corta o dropdown — remove ao abrir */
-    .hdr:has(.clients-wrap:hover){clip-path:none}
+    .clients-wrap{position:relative}
     .clients-menu{
-      position:absolute;top:calc(100% + 8px);right:0;
+      position:fixed;
       background:#faf9f6;border:1.5px solid var(--bd);border-radius:12px;
       padding:6px;min-width:210px;box-shadow:0 8px 32px rgba(26,26,26,.12);
-      display:none;z-index:9999;
+      display:none;z-index:99999;
     }
-    /* ponte invisível que mantém o hover ao mover o mouse do botão pro menu */
-    .clients-menu::before{
-      content:'';position:absolute;top:-12px;left:0;right:0;height:12px;
-    }
-    .clients-wrap:hover .clients-menu{display:block}
     .clients-menu a{
       display:block;padding:9px 14px;border-radius:8px;
       font-size:12px;font-weight:600;color:var(--obs);
@@ -828,6 +821,28 @@ function calc(){
   document.getElementById('gainNum').className='gain-num'+(gain<0?' neg':'');
 }
 calc();
+
+// Dropdown clientes — position:fixed para escapar de clip-path do header
+(function(){
+  const wrap = document.querySelector('.clients-wrap');
+  const btn  = document.querySelector('.clients-btn');
+  const menu = document.querySelector('.clients-menu');
+  if (!wrap || !menu) return;
+
+  function show() {
+    const r = btn.getBoundingClientRect();
+    menu.style.top   = (r.bottom + 6) + 'px';
+    menu.style.right = (window.innerWidth - r.right) + 'px';
+    menu.style.left  = 'auto';
+    menu.style.display = 'block';
+  }
+  function hide() { menu.style.display = 'none'; }
+
+  wrap.addEventListener('mouseenter', show);
+  wrap.addEventListener('mouseleave', e => { if (!menu.contains(e.relatedTarget)) hide(); });
+  menu.addEventListener('mouseenter', show);
+  menu.addEventListener('mouseleave', e => { if (!wrap.contains(e.relatedTarget)) hide(); });
+})();
 </script>
 </body>
 </html>

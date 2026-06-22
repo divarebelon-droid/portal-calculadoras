@@ -414,6 +414,8 @@
     }
     .clients-btn:hover{border-color:var(--obs);color:var(--obs)}
     .clients-wrap{position:relative;overflow:visible}
+    /* clip-path da animação curtain fica em inset(0 0% 0 0) e corta o dropdown — remove ao abrir */
+    .hdr:has(.clients-wrap:hover){clip-path:none}
     .clients-menu{
       position:absolute;top:calc(100% + 8px);right:0;
       background:#faf9f6;border:1.5px solid var(--bd);border-radius:12px;

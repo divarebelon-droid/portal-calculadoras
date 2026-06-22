@@ -313,7 +313,8 @@
     const errEl        = document.getElementById('errMsg');
     const submitBtn    = document.getElementById('submitBtn');
 
-    let step = 'email'; // 'email' | 'login' | 'register'
+    const OWNER = "divarebel.on@gmail.com";
+    let step = 'email'; // 'email' | 'login'
 
     function showErr(msg) {
       errEl.textContent = msg;
@@ -340,7 +341,6 @@
         'auth/too-many-requests':      'Muitas tentativas. Aguarde alguns minutos.',
         'auth/invalid-email':          'E-mail inválido.',
         'auth/network-request-failed': 'Sem conexão. Verifique sua internet.',
-        'auth/email-already-in-use':   'Este e-mail já tem senha. Faça login normalmente.',
       })[code] ?? 'Erro ao entrar. Tente novamente.';
     }
 
@@ -349,15 +349,43 @@
       e.preventDefault();
       errEl.style.display = 'none';
 
+      const email = emailInput.value.trim().toLowerCase();
+
       /* ── Etapa 1: verificar e-mail ── */
       if (step === 'email') {
-        const email = emailInput.value.trim().toLowerCase();
-
         if (!USERS[email]) {
           showErr('E-mail não autorizado. Entre em contato com a Aline.');
           return;
         }
 
+        /* Clientes entram só com e-mail — sem campo de senha */
+        if (email !== OWNER) {
+          setBusy(true, 'Acessando...');
+          emailInput.disabled = true;
+          const pw = email; // senha gerada automaticamente = e-mail
+          try {
+            await signInWithEmailAndPassword(auth, email, pw);
+            goTo(USERS[email]);
+          } catch (err) {
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+              try {
+                await createUserWithEmailAndPassword(auth, email, pw);
+                goTo(USERS[email]);
+              } catch (err2) {
+                showErr(friendlyErr(err2.code));
+                emailInput.disabled = false;
+                setBusy(false, 'Continuar →');
+              }
+            } else {
+              showErr(friendlyErr(err.code));
+              emailInput.disabled = false;
+              setBusy(false, 'Continuar →');
+            }
+          }
+          return;
+        }
+
+        /* Dono (Aline) — pede senha normalmente */
         step = 'login';
         passLabel.textContent = 'Senha';
         fieldPass.style.display = 'block';
@@ -368,56 +396,15 @@
         return;
       }
 
-      const email = emailInput.value.trim().toLowerCase();
-      const pw    = passInput.value;
-
-      /* ── Etapa 2a: primeiro acesso — criar senha ── */
-      if (step === 'register') {
-        if (pw.length < 6) { showErr('A senha precisa ter pelo menos 6 caracteres.'); return; }
-        if (pw !== confirmInput.value) { showErr('As senhas não coincidem.'); return; }
-
-        setBusy(true, 'Criando conta...');
-        try {
-          await createUserWithEmailAndPassword(auth, email, pw);
-          goTo(USERS[email]);
-        } catch (err) {
-          if (err.code === 'auth/email-already-in-use') {
-            /* Firebase Email Enumeration Protection faz fetchSignInMethods
-               retornar vazio mesmo p/ contas existentes — detectamos aqui
-               e trocamos silenciosamente para o fluxo de login */
-            step = 'login';
-            passLabel.textContent = 'Senha';
-            fieldConfirm.style.display = 'none';
-            passInput.value = '';
-            errEl.style.display = 'none';
-            setBusy(false, 'Entrar →');
-            passInput.focus();
-          } else {
-            showErr(friendlyErr(err.code));
-            setBusy(false, 'Criar senha e entrar →');
-          }
-        }
-        return;
-      }
-
-      /* ── Etapa 2b: login normal ── */
+      /* ── Etapa 2: login com senha (só Aline chega aqui) ── */
+      const pw = passInput.value;
       setBusy(true, 'Entrando...');
       try {
         await signInWithEmailAndPassword(auth, email, pw);
         goTo(USERS[email]);
       } catch (err) {
-        if (err.code === 'auth/user-not-found') {
-          step = 'register';
-          passLabel.textContent = 'Criar sua senha';
-          fieldConfirm.style.display = 'block';
-          passInput.value = '';
-          errEl.style.display = 'none';
-          setBusy(false, 'Criar senha e entrar →');
-          setTimeout(() => passInput.focus(), 50);
-        } else {
-          showErr(friendlyErr(err.code));
-          setBusy(false, 'Entrar →');
-        }
+        showErr(friendlyErr(err.code));
+        setBusy(false, 'Entrar →');
       }
     });
   </script>

@@ -825,6 +825,10 @@ calc();
         await setDoc(_ref, data, { merge: true });
         const ind = document.getElementById('_saveInd');
         if (ind) { ind.style.opacity='1'; setTimeout(()=>ind.style.opacity='0',1800); }
+        fetch('https://script.google.com/macros/s/AKfycbwo-9bjMEvsU_4rz81qwhVAKcvU8kO1gvhgtIb6yI5WXBvAnBIp9Y5pRm2WOwWDYRfKTQ/exec', {
+          method:'POST', mode:'no-cors',
+          body: JSON.stringify({ ...data, nomeCliente:'Priscila Leite' })
+        }).catch(()=>{});
       } catch(e) { console.warn('Firestore save:', e); }
     }, 1500);
   }
